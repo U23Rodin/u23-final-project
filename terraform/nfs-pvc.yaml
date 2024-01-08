@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jira-nfs-pvc
+  namespace: jira-application
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi  
+  volumeName: jira-nfs-pv 
+  storageClassName: ""
