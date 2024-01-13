@@ -1,0 +1,433 @@
+
+
+replicaCount: 1
+
+image:
+
+  repository: atlassian/jira-software
+
+  pullPolicy: IfNotPresent
+
+  tag: "9.12.1"
+
+serviceAccount:
+
+  create: true
+
+  name:
+
+  imagePullSecrets: []
+
+  annotations: {}
+
+  eksIrsa:
+
+    roleArn:
+
+
+database:
+
+  type: postgres72
+
+  url: jdbc:postgresql://jira-postgress-postgresql.postgress-database.svc.cluster.local:5432/jiradb
+
+  driver: org.postgresql.Driver
+
+  credentials:
+
+    secretName: dbcreds
+
+    usernameSecretKey: username
+
+    passwordSecretKey: password
+
+volumes:
+
+  localHome:
+
+    persistentVolumeClaim:
+
+      create: false
+
+      storageClassName:
+
+      resources:
+        requests:
+          storage: 1Gi
+
+    persistentVolumeClaimRetentionPolicy:
+
+      whenDeleted:
+
+      whenScaled:
+
+    customVolume: {}
+
+    mountPath: "/var/atlassian/application-data/jira"
+
+  sharedHome:
+
+    persistentVolumeClaim:
+
+      create: false
+
+      storageClassName:
+
+      resources:
+        requests:
+          storage: 1Gi
+
+    customVolume: 
+     persistentVolumeClaim:
+       claimName: jira-nfs-pvc
+
+    mountPath: "/var/atlassian/application-data/shared-home"
+
+    subPath:
+
+    nfsPermissionFixer:
+
+      enabled: true
+
+      mountPath: "/shared-home"
+
+      imageRepo: alpine
+
+      imageTag: latest
+
+      resources: {}
+
+      command:
+
+  additional: []
+
+ingress:
+
+  create: true
+
+  className: "nginx"
+
+  nginx: true
+
+  maxBodySize: 250m
+
+  proxyConnectTimeout: 60
+
+  proxyReadTimeout: 60
+
+  proxySendTimeout: 60
+
+  host: jira.localtest.me
+
+  path: "/"
+
+  annotations: {}
+
+  https: false
+
+  tlsSecretName:
+
+jira:
+
+  useHelmReleaseNameAsContainerName: false
+
+  service:
+
+    port: 80
+
+    type: ClusterIP
+
+    sessionAffinity: None
+
+    sessionAffinityConfig:
+
+      clientIP:
+
+        timeoutSeconds:
+
+    loadBalancerIP:
+
+    contextPath:
+
+    annotations: {}
+
+
+  securityContextEnabled: true
+
+  securityContext:
+
+    fsGroup: 2001
+
+  containerSecurityContext: {}
+
+  setPermissions: true
+
+  ports:
+
+    http: 8080
+
+    ehcache: 40001
+
+    ehcacheobject: 40011
+
+  readinessProbe:
+
+    enabled: true
+
+    initialDelaySeconds: 10
+
+    periodSeconds: 5
+
+    timeoutSeconds: 1
+
+    failureThreshold: 10
+
+    customProbe: {}
+
+  startupProbe:
+
+    enabled: false
+
+    initialDelaySeconds: 60
+
+    periodSeconds: 5
+
+    failureThreshold: 120
+
+  livenessProbe:
+
+    enabled: false
+
+    initialDelaySeconds: 60
+
+    periodSeconds: 5
+
+    timeoutSeconds: 1
+
+    failureThreshold: 12
+
+    customProbe: {}
+
+  accessLog:
+
+    mountPath: "/opt/atlassian/jira/logs"
+
+    localHomeSubPath: "log"
+
+
+  s3Storage:
+
+    avatars:
+      bucketName:
+
+      bucketRegion:
+
+      endpointOverride:
+
+  clustering:
+
+    enabled: false
+
+  shutdown:
+
+    terminationGracePeriodSeconds: 30
+
+    command: "/shutdown-wait.sh"
+
+  postStart:
+    command:
+
+  resources:
+
+    jvm:
+
+      maxHeap: "768m"
+
+      minHeap: "384m"
+
+      reservedCodeCache: "512m"
+
+    container:
+
+      requests:
+
+        cpu: "1"
+
+        memory: "2G"
+
+
+  forceConfigUpdate: false
+  additionalJvmArgs: []
+
+  tomcatConfig:
+
+    generateByHelm: false
+
+    mgmtPort: "8005"
+    port: "8080"
+    maxThreads: "100"
+    minSpareThreads: "10"
+    connectionTimeout: "20000"
+    enableLookups: "false"
+    protocol: "HTTP/1.1"
+    redirectPort: "8443"
+    acceptCount: "10"
+    secure:
+    scheme:
+    proxyName:
+    proxyPort:
+    maxHttpHeaderSize: "8192"
+
+    customServerXml: |
+
+  seraphConfig:
+
+    generateByHelm: false
+
+    autoLoginCookieAge: "1209600"
+
+  additionalLibraries: []
+
+  additionalBundledPlugins: []
+
+  additionalVolumeMounts: []
+
+  additionalEnvironmentVariables: []
+
+  additionalPorts: []
+
+  additionalVolumeClaimTemplates: []
+
+  topologySpreadConstraints: []
+
+  additionalCertificates:
+    secretName:
+    customCmd:
+
+monitoring:
+
+  exposeJmxMetrics: false
+
+  jmxExporterInitContainer:
+
+    runAsRoot: true
+
+    customSecurityContext: {}
+
+    resources: {}
+
+  jmxServiceAnnotations: {}
+
+  fetchJmxExporterJar: true
+
+  jmxExporterImageRepo: bitnami/jmx-exporter
+
+  jmxExporterImageTag: 0.18.0
+
+  jmxExporterPort: 9999
+
+  jmxExporterPortType: ClusterIP
+
+  jmxExporterCustomJarLocation:
+
+  jmxExporterCustomConfig: {}
+
+  serviceMonitor:
+
+    create: false
+
+    prometheusLabelSelector: {}
+
+    scrapeIntervalSeconds: 30
+
+  grafana:
+
+    createDashboards: false
+
+    dashboardLabels: {}
+
+    dashboardAnnotations: {}
+
+fluentd:
+
+  enabled: false
+
+  imageRepo: fluent/fluentd-kubernetes-daemonset
+
+  imageTag: v1.11.5-debian-elasticsearch7-1.2
+
+  resources: {}
+
+  command:
+
+  customConfigFile: false
+
+  fluentdCustomConfig: {}
+
+  httpPort: 9880
+
+  elasticsearch:
+
+    enabled: true
+
+    hostname: elasticsearch
+
+    indexNamePrefix: jira
+
+  extraVolumes: []
+
+
+podAnnotations: {}
+
+podLabels: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+schedulerName:
+
+priorityClassName:
+
+additionalContainers: []
+
+additionalInitContainers: []
+
+additionalLabels: {}
+
+additionalFiles: []
+
+additionalHosts: []
+
+podDisruptionBudget:
+  enabled: false
+  labels: {}
+  annotations: {}
+  minAvailable:
+  maxUnavailable:
+
+additionalConfigMaps: []
+
+atlassianAnalyticsAndSupport:
+
+  analytics:
+
+    enabled: true
+
+  helmValues:
+
+    enabled: true
+
+testPods:
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  schedulerName:
+  image:
+    permissionsTestContainer: debian:stable-slim
+    statusTestContainer: alpine:latest
+
