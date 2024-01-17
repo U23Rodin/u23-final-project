@@ -100,6 +100,7 @@ module "rds" {
 
   db_name  = "jiradb"
   username = "jira"
+  password = "Def12345"
   port     = 5432
 
   multi_az               = false
@@ -192,14 +193,39 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
 
+data "aws_caller_identity" "current" {
+  depends_on = [module.eks]
+}
+
 resource "aws_iam_policy" "lb_controller_policy" {
+  depends_on = [module.eks]
+
   name   = "AWSLoadBalancerControllerIAMPolicy"
   policy = file("${path.module}/iam_policy.json")
 }
 
+locals {
+  oidc_provider_url = replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(local.oidc_provider_url, "https://", "")}"
+}
+/* Used for debugging
+output "oidc_provider_url" {
+  value = local.oidc_provider_url
+}
+
+output "oidc_provider_arn" {
+  value = local.oidc_provider_arn
+}
+*/
 resource "aws_iam_role" "lb_controller_role" {
-  name               = "AWSLoadBalancerControllerRole"
-  assume_role_policy = file("${path.module}/load-balancer-role-trust-policy.json")
+  depends_on = [module.eks]
+
+  name = "AWSLoadBalancerControllerRole"
+  assume_role_policy = templatefile("${path.module}/load-balancer-role-trust-policy.json.tpl", {
+    oidc_provider_arn = local.oidc_provider_arn
+    oidc_provider_url = local.oidc_provider_url
+    cluster_name      = module.eks.cluster_name
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "lb_controller_attach" {
@@ -308,7 +334,8 @@ resource "helm_release" "jira" {
   depends_on = [
     module.eks,
     module.efs,
-    module.rds
+    module.rds,
+    helm_release.aws_lb_controller
   ]
 
   name       = "jira-application"
@@ -346,17 +373,17 @@ resource "helm_release" "jira" {
 
   set {
     name  = "ingress.proxyConnectTimeout"
-    value = "180"
+    value = "300"
   }
 
   set {
     name  = "ingress.proxyReadTimeout"
-    value = "180"
+    value = "300"
   }
 
   set {
     name  = "ingress.proxySendTimeout"
-    value = "180"
+    value = "300"
   }
 
   set {
@@ -385,6 +412,11 @@ resource "helm_release" "jira" {
   }
 
   set {
+    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/load-balancer-attributes"
+    value = "idle_timeout.timeout_seconds=300"
+  }
+
+  set {
     name  = "volumes.sharedHome.persistentVolumeClaim.create"
     value = "false"
   }
@@ -409,3 +441,4 @@ resource "helm_release" "jira" {
     value = "1"
   }
 }
+
