@@ -160,14 +160,26 @@ module "eks" {
   control_plane_subnet_ids = module.vpc.intra_subnets
 
   eks_managed_node_groups = {
-    blue = {}
-    green = {
+    test = {
       min_size     = 1
       max_size     = 1
       desired_size = 1
 
-      instance_type = ["t3.medium"]
-      capacity_type = "SPOT"
+      instance_types = ["m5.large"]
+      capacity_type  = "SPOT"
+
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 100
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 150
+            delete_on_termination = true
+          }
+        }
+      }
     }
   }
 }
@@ -207,6 +219,7 @@ resource "aws_iam_policy" "lb_controller_policy" {
 locals {
   oidc_provider_url = replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")
   oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(local.oidc_provider_url, "https://", "")}"
+  db_credentials    = jsondecode(data.aws_secretsmanager_secret_version.db_password.secret_string)
 }
 /* Used for debugging
 output "oidc_provider_url" {
@@ -277,8 +290,8 @@ resource "kubernetes_secret" "dbcreds" {
   }
 
   data = {
-    "username" = "jira"
-    "password" = "Def12345"
+    "username" = "${local.db_credentials["username"]}"
+    "password" = "${local.db_credentials["password"]}"
   }
 }
 
@@ -330,6 +343,10 @@ resource "kubernetes_persistent_volume_claim" "efs_claim" {
   }
 }
 
+data "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = module.rds.db_instance_master_user_secret_arn
+}
+
 resource "helm_release" "jira" {
   depends_on = [
     module.eks,
@@ -351,6 +368,37 @@ resource "helm_release" "jira" {
     name  = "image.tag"
     value = "9.12.1"
   }
+
+  set {
+    name  = "database.type"
+    value = "postgres72"
+  }
+
+  set {
+    name  = "database.url"
+    value = "jdbc:postgresql://${module.rds.db_instance_endpoint}/${module.rds.db_instance_name}"
+  }
+
+  set {
+    name  = "database.driver"
+    value = "org.postgresql.Driver"
+  }
+
+  set {
+    name  = "database.credentials.secretName"
+    value = "dbcreds"
+  }
+
+  set {
+    name  = "database.credentials.usernameSecretKey"
+    value = "username"
+  }
+
+  set {
+    name  = "database.credentials.passwordSecretKey"
+    value = "password"
+  }
+
   set {
     name  = "ingress.create"
     value = "true"
@@ -440,5 +488,42 @@ resource "helm_release" "jira" {
     name  = "jira.resources.container.requests.cpu"
     value = "1"
   }
+
+  set {
+    name  = "jira.resources.container.requests.memory"
+    value = "4G"
+  }
+
+  set {
+    name  = "jira.resources.jvm.maxHeap"
+    value = "1G"
+  }
+
+  set {
+    name  = "jira.resources.jvm.minHeap"
+    value = "384m"
+  }
+
+  set {
+    name  = "jira.resources.jvm.reservedCodeCache"
+    value = "512m"
+  }
 }
 
+output "db_password" {
+  value     = data.aws_secretsmanager_secret_version.db_password.secret_string
+  sensitive = true
+}
+
+output "kubernetes_secret_values" {
+  value = {
+    "username" = base64encode(local.db_credentials["username"])
+    "password" = base64encode(local.db_credentials["password"])
+  }
+  sensitive = true
+}
+
+output "url" {
+  value     = "jdbc:postgresql://${module.rds.db_instance_endpoint}/${module.rds.db_instance_name}"
+  sensitive = true
+}
