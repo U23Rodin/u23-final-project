@@ -88,8 +88,8 @@ module "efs" {
   version = "1.4.0"
 
   # Configuration for the EFS instance
-  name           = "jira-efs"
-  creation_token = "jira-efs"
+  name           = var.efs_name
+  creation_token = var.efs_creation_token
 
   # Mount targets for the EFS within the VPC
   mount_targets = {
