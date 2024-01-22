@@ -14,6 +14,14 @@ terraform {
       version = "2.25.2"
     }
   }
+
+  backend "s3" {
+    bucket         = "jira-project-state"
+    key            = "global/s3/terraform.tfstate"
+    region         = "eu-central-1"
+    dynamodb_table = "terraform-state-locking"
+    encrypt        = true
+  }
 }
 
 # AWS provider configuration
