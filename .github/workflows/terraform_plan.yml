@@ -118,11 +118,16 @@ jobs:
         run: terraform show -no-color plan.tfplan > plan.txt
         working-directory: terraform/
 
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
+      - name: Upload Terraform Plan to S3
+        uses: jakejarvis/s3-sync-action@master
         with:
-          name: terraform-plan-binary
-          path: terraform/plan.tfplan
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-central-1'
+          SOURCE_DIR: 'terraform/plan.tfplan'
       
       - name: Upload Readable Terraform Plan
         uses: actions/upload-artifact@v4
