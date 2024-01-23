@@ -20,6 +20,13 @@ jobs:
         with:
           terraform_version: "1.6.6"
 
+      - name: Run terraform init
+        run: terraform init
+        working-directory: terraform/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run terraform fmt 
         run: terraform fmt -check
         working-directory: terraform/
@@ -68,10 +75,21 @@ jobs:
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
 
+  checkov:
+    name: checkov
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: checkov
+        uses: bridgecrewio/checkov-action@v12
+
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
-    needs: [terraform-lint, markdown-check, gitleaks-scan, tfsec]
+    needs: [terraform-lint, markdown-check, gitleaks-scan]
     
     steps:
       - name: Checkout code
@@ -85,6 +103,9 @@ jobs:
       - name: Terraform Initialize
         run: terraform init 
         working-directory: terraform/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Plan
         run: terraform plan -out=plan.tfplan
@@ -93,8 +114,30 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Upload Terraform Plan
+      - name: Convert Terraform Plan
+        run: terraform show -no-color plan.tfplan > plan.txt
+        working-directory: terraform/
+
+      - name: Set up AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region eu-central-1
+
+      - name: Upload Terraform Plan to S3
+        run: |
+          aws s3 cp ./terraform/plan.tfplan s3://${{ secrets.AWS_S3_BUCKET_NAME }}/plan/plan.tfplan
+      
+      - name: Upload Readable Terraform Plan
         uses: actions/upload-artifact@v4
         with:
-          name: terraform-plan
-          path: terraform/plan.tfplan
+          name: readable-terraform-plan
+          path: terraform/plan.txt
+
+      - name: Create Pull Request
+        run: |
+          gh pr create --base master --head development --title "Terraform Plan Update" --body "Commit: ${{ github.event.head_commit.message }}
+
+          To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})." --label "automated-pr"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
