@@ -132,9 +132,8 @@ jobs:
 
       - name: Create Pull Request
         run: |
-          gh pr create --base master --head development --title "Terraform Plan Update" --body |
-            "Commit: ${{ github.event.head_commit.message }}
+          gh pr create --base master --head development --title "Terraform Plan Update" --body "Commit: ${{ github.event.head_commit.message }}
 
-            To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})." --label "automated-pr"
+          To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})." --label "automated-pr"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
