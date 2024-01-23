@@ -122,15 +122,11 @@ jobs:
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region your-region
+          aws configure set default.region eu-central-1
 
       - name: Upload Terraform Plan to S3
         run: |
           aws s3 cp ./terraform/plan.tfplan s3://${{ secrets.AWS_S3_BUCKET_NAME }}/plan/plan.tfplan
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: 'eu-central-1'
       
       - name: Upload Readable Terraform Plan
         uses: actions/upload-artifact@v4
