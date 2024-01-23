@@ -20,6 +20,10 @@ jobs:
         with:
           terraform_version: "1.6.6"
 
+      - name: Run terraform init
+        run: terraform init
+        working-directory: terraform/
+
       - name: Run terraform fmt 
         run: terraform fmt -check
         working-directory: terraform/
