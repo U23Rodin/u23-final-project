@@ -8,9 +8,41 @@ on:
       - master
 
 jobs:
-  test-job:
+  terraform-apply:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'Terraform Plan Update')
     runs-on: ubuntu-latest
+
     steps:
-      - name: Output Text
-        run: echo "This is a test job."
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Run terraform init
+        run: terraform init
+        working-directory: terraform/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Set up AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region eu-central-1
+
+      - name: Download Terraform plan
+        run: |
+          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET_NAME }}/plan/plan.tfplan .
+        working-directory: terraform/
+
+      - name: Run terraform apply 
+        run: terraform apply "plan.tfplan"
+        working-directory: terraform/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
