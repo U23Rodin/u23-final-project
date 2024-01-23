@@ -78,7 +78,7 @@ jobs:
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
-    needs: [terraform-lint, markdown-check, gitleaks-scan, tfsec]
+    needs: [terraform-lint, markdown-check, gitleaks-scan]
     
     steps:
       - name: Checkout code
