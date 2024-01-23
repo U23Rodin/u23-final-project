@@ -133,8 +133,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           base: master
-          branch: development
+          branch: pr-branch-${{ github.run_id }}
           title: "Terraform Plan Update"
           body: |
             Commit: ${{ github.event.head_commit.message }} 
