@@ -130,27 +130,27 @@ jobs:
           name: readable-terraform-plan
           path: terraform/plan.txt
 
-    create-pr:
-      name: Create Pull Request
-      runs-on: ubuntu-latest
-      needs: [terraform-plan]
+  create-pr:
+    name: Create Pull Request
+    runs-on: ubuntu-latest
+    needs: [terraform-plan]
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-          with:
-            ref: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: development
 
-        - name: Create Pull Request
-          uses: peter-evans/create-pull-request@v5
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            base: master
-            branch: pr-update-${{ github.run_number }}
-            title: "Terraform Plan Update"
-            body: |
-              Commit: ${{ github.event.head_commit.message }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: master
+          branch: pr-update-${{ github.run_number }}
+          title: "Terraform Plan Update"
+          body: |
+            Commit: ${{ github.event.head_commit.message }}
 
-              To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-            labels: automated-pr
+            To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+          labels: automated-pr
 
