@@ -75,6 +75,17 @@ jobs:
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
 
+  checkov:
+    name: checkov
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: checkov
+        uses: bridgecrewio/checkov-action@v12
+
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
