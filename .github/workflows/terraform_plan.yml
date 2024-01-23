@@ -116,6 +116,7 @@ jobs:
 
       - name: Convert Terraform Plan
         run: terraform show -no-color plan.tfplan > plan.txt
+        working-directory: terraform/
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
