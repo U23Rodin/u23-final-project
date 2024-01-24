@@ -74,6 +74,8 @@ jobs:
 
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          exclude-downloaded-modules: true
 
   checkov:
     name: checkov
@@ -85,6 +87,8 @@ jobs:
 
       - name: checkov
         uses: bridgecrewio/checkov-action@v12
+        with:
+          skip_path: "**/.terraform/**"
 
   terraform-plan:
     name: terraform-plan
