@@ -41,7 +41,9 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
 }
 
 resource "aws_kms_key" "terraform_state" {
-  description             = "KMS key for DynamoDB table encryption"
+  description             = "KMS key for DynamoDB table and S3 bucket encryption"
+  is_enabled              = var.kms_key_enabled
+  enable_key_rotation     = var.kms_key_rotation
   deletion_window_in_days = var.kms_key_deletion_period
 }
 

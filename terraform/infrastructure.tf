@@ -1,7 +1,6 @@
 # VPC module for creating the Virtual Private Cloud on AWS
 module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.5.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=e4768508a17f79337f9f1e48ebf47ee885b98c1f"
 
   # Setting up VPC parameters using variables
   name = var.vpc_name
@@ -33,8 +32,7 @@ module "vpc" {
 
 # Security Group module for the database
 module "security-group" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-security-group.git?ref=43974e94067251ee464018288aa44862d0adba22"
 
   # Basic configuration of the security group
   name        = var.database_sg_name
@@ -55,8 +53,7 @@ module "security-group" {
 
 # RDS (Relational Database Service) module for the database backend
 module "rds" {
-  source  = "terraform-aws-modules/rds/aws"
-  version = "6.3.1"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-rds.git?ref=7bb82a6e7646837cbacac2badcb618329fa25963"
 
   # Database configuration using variables
   identifier = var.rds_name
@@ -84,8 +81,7 @@ module "rds" {
 
 # EFS (Elastic File System) module for persistent storage
 module "efs" {
-  source  = "terraform-aws-modules/efs/aws"
-  version = "1.4.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-efs.git?ref=fcca2fc6bb8736871cd78172192c4e17c1e43f64"
 
   # Configuration for the EFS instance
   name           = var.efs_name
@@ -115,8 +111,7 @@ output "efs_mount_targets" {
 
 # EKS (Elastic Kubernetes Service) module for running Jira in a containerized environment
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "19.21.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=2cb1fac31b0fc2dd6a236b0c0678df75819c5a3b"
 
   # Basic EKS cluster configuration
   cluster_name                   = var.eks_cluster_name

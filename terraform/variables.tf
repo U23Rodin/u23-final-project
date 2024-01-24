@@ -519,3 +519,9 @@ variable "helm_jira_readinessProbe_enabled" {
   type        = bool
   default     = false
 }
+
+variable "kubernetes_jira_namespace" {
+  description = "The name of the kubernetes jira application namespace"
+  type        = string
+  default     = "jira-app"
+}

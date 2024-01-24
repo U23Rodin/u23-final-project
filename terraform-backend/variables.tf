@@ -46,6 +46,18 @@ variable "s3_restrict_public_buckets" {
   default     = true
 }
 
+variable "kms_key_enabled" {
+  description = "KMS key is_enabled parameter"
+  type        = bool
+  default     = true
+}
+
+variable "kms_key_rotation" {
+  description = "KMS key rotation parameter"
+  type        = bool
+  default     = true
+}
+
 variable "kms_key_deletion_period" {
   description = "The deletion window in days for the kms key"
   type        = number

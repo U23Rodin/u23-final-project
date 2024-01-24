@@ -4,7 +4,8 @@ resource "kubernetes_secret" "dbcreds" {
 
   # Metadata for the secret, including the name
   metadata {
-    name = var.kubernetes_db_secret_name
+    name      = var.kubernetes_db_secret_name
+    namespace = var.kubernetes_jira_namespace
   }
 
   # Data for the secret, pulling credentials from local variables
@@ -54,7 +55,8 @@ resource "kubernetes_persistent_volume_claim" "efs_claim" {
 
   # Metadata for the persistent volume claim
   metadata {
-    name = var.kubernetes_pvc_name
+    name      = var.kubernetes_pvc_name
+    namespace = var.kubernetes_jira_namespace
   }
 
   # Specification of the persistent volume claim
@@ -79,6 +81,7 @@ resource "helm_release" "jira" {
   ]
 
   name       = var.helm_jira_name
+  namespace  = var.kubernetes_jira_namespace
   repository = var.helm_jira_repository
   chart      = var.helm_jira_chart
 
