@@ -1,5 +1,7 @@
 # Resource for creating a Kubernetes namespace for Jira
 resource "kubernetes_namespace" "jira_app" {
+  provider = kubernetes.post-eks
+
   metadata {
     name = var.kubernetes_jira_namespace
   }
