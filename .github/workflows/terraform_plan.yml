@@ -4,7 +4,7 @@ name: Terraform Plan
 on:
   push:
     branches:
-      - development
+      - staging
 
 jobs:
   terraform-lint:
@@ -74,6 +74,8 @@ jobs:
 
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          additional_args: '--exclude-downloaded-modules'
 
   checkov:
     name: checkov
@@ -85,6 +87,8 @@ jobs:
 
       - name: checkov
         uses: bridgecrewio/checkov-action@v12
+        with:
+          skip_path: "**/.terraform/**"
 
   terraform-plan:
     name: terraform-plan
@@ -137,7 +141,7 @@ jobs:
       - name: Create Pull Request
         run: |
           CURRENT_DATE=$(date +'%Y-%m-%d')
-          gh pr create --base master --head development --title "Terraform Plan Update - $CURRENT_DATE" --body "Commit: ${{ github.event.head_commit.message }}
+          gh pr create --base master --head workflow-development --title "Terraform Plan Update - $CURRENT_DATE" --body "Commit: ${{ github.event.head_commit.message }}
 
           To review the human-readable Terraform plan, please download the plan from the [Actions run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})." --label "automated-pr"
         env:
