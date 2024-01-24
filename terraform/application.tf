@@ -1,3 +1,10 @@
+# Resource for creating a Kubernetes namespace for Jira
+resource "kubernetes_namespace" "jira_app" {
+  metadata {
+    name = var.kubernetes_jira_namespace
+  }
+}
+
 # Resource for creating a Kubernetes secret to store database credentials
 resource "kubernetes_secret" "dbcreds" {
   provider = kubernetes.post-eks
