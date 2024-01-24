@@ -75,7 +75,7 @@ jobs:
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
-          exclude-downloaded-modules: true
+          additional_args: '--exclude-downloaded-modules'
 
   checkov:
     name: checkov
