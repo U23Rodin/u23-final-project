@@ -4,6 +4,8 @@
 
 This project automates the deployment of Atlassian Jira on AWS, utilizing Kubernetes for container orchestration. The core components of the system are provisioned and managed using Terraform, which sets up essential AWS services like RDS, EFS, VPC, EKS, and ELB. Jira itself is deployed through Helm charts, ensuring a streamlined and repeatable installation process.
 
+[Infrastructure Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/infrastructure-diagram.jpg)
+
 ## Features
 - **Infrastructure as Code**: Terraform scripts create a reproducible and version-controlled infrastructure setup.
 - **Kubernetes Integration**: Utilizes Kubernetes for deploying and managing Jira, facilitating easy scaling and management.
@@ -12,6 +14,8 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 - **Source Control Management**: The entire project is managed through a version control system, ensuring that changes to the codebase are tracked, reviewed, and maintained systematically.
 - **Public Cloud Utilization**: Leveraging AWS cloud services provides scalable and reliable cloud infrastructure, capable of adapting to changing demands and workloads.
 - **Immutable Infrastructure**: Emphasizing on immutable infrastructure principles, where changes are made by replacing infrastructure rather than altering existing setups. This reduces inconsistencies and potential errors during deployments.
+
+[Build Pipeline Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/build-pipeline.jpg)
 
 ## Requirements
 
