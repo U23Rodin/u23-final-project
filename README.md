@@ -21,6 +21,8 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 
 - AWS Account
 - Terraform installed (Tested with v1.6.6)
+- Kubernetes tools (Optional)
+- Helm (Optional)
 
 ## Configuration and Installation
 
@@ -28,14 +30,34 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 2. [**Set up AWS authentication**](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration)
 3. **Clone the Repository**: `git clone https://github.com/U23Rodin/u23-final-project.git`
 4. **Set up the backend**:
-	1. `cd terraform-backend`
+	- **To use local backend:**
+		1. `cd terraform/`
+		2. Edit providers.tf & remove `backend "s3"` block
+	- **To use remote backend (recommended):**
+	1. `cd terraform-backend/`
 	2. set up a globally unique name for the `s3_bucket_name` variable
-	4. `terraform init`
-	5. `terraform validate`
-	6. `terraform apply`
-5. **Set up terraform**
+	3. `terraform init`
+	4. `terraform validate`
+	5. `terraform apply`
+6. **Set up terraform**
 	1. `cd terraform`
 	2. set up the same s3 bucket name for the backend in the providers.tf file
 	3. `terraform init`
 	4. `terraform validate`
 	5. `terraform plan&apply`
+
+## Destruction and Clean-up
+
+**Do not use `terraform destroy` directly!**
+
+**Instead follow the below steps:**
+1. `cd terraform/`
+2. Run `terraform destroy -target=helm_release.jira` to destroy the Jira deployment first
+3. Run `terraform destroy` to destroy the rest of the infrastructure
+4. Delete the S3 bucket for state storage manually
+5. `cd terraform-backend/`
+6. Run `terraform destroy` to destroy the rest of the backend resources
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
