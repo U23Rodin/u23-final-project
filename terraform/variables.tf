@@ -355,7 +355,7 @@ variable "kubernetes_pvc_storage" {
 variable "helm_jira_name" {
   description = "The name of the helm release for Jira"
   type        = string
-  default     = "jira-application"
+  default     = "jira-application-test"
 }
 
 variable "helm_jira_repository" {
