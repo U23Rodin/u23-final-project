@@ -7,13 +7,13 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 [Infrastructure Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/infrastructure-diagram.jpg)
 
 ## Features
-- **Infrastructure as Code**: Terraform scripts create a reproducible and version-controlled infrastructure setup.
-- **Kubernetes Integration**: Utilizes Kubernetes for deploying and managing Jira, facilitating easy scaling and management.
-- **Automated Workflows**: Includes CI/CD pipelines for automatic execution of Terraform code, enhancing the efficiency and reliability of deployments.
-- **Security Checks**: Incorporates security scanning tools like gitleaks and checkov, ensuring the infrastructure adheres to security best practices.
-- **Source Control Management**: The entire project is managed through a version control system, ensuring that changes to the codebase are tracked, reviewed, and maintained systematically.
-- **Public Cloud Utilization**: Leveraging AWS cloud services provides scalable and reliable cloud infrastructure, capable of adapting to changing demands and workloads.
-- **Immutable Infrastructure**: Emphasizing on immutable infrastructure principles, where changes are made by replacing infrastructure rather than altering existing setups. This reduces inconsistencies and potential errors during deployments.
+- **Infrastructure as Code (IaC)**: Utilizes Terraform to create a reproducible, version-controlled infrastructure on AWS, ensuring consistency and reliability in deployments.
+- **Kubernetes Integration**: Employs AWS EKS (Elastic Kubernetes Service) for Kubernetes control plane management, facilitating efficient deployment, scaling, and management of Jira on a Kubernetes cluster.
+- **CI/CD with GitHub Actions**: Implements Continuous Integration and Continuous Deployment (CI/CD) using GitHub Actions, enabling automated workflows for efficient and reliable deployment processes.
+- **Security Checks**: Integrates security scanning tools such as Checkov and Gitleaks to ensure compliance with security best practices and safeguard against accidental exposure of sensitive data in code repositories.
+- **Source Control Management**: Manages the project using Git and Github, providing a robust framework for tracking, reviewing, and maintaining changes systematically.
+- **Public Cloud Utilization with AWS**: Leverages various AWS cloud services for a scalable and reliable cloud infrastructure, capable of adapting to changing demands and workloads.
+- **Immutable Infrastructure Principles**: Emphasizes immutable infrastructure, where infrastructure updates are made by replacing components rather than modifying existing ones, thereby reducing inconsistencies and potential errors during deployments.
 
 [Build Pipeline Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/build-pipeline.jpg)
 
@@ -24,6 +24,19 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 - Kubernetes tools (Optional)
 - Helm (Optional)
 
+### Operational Requirements
+For deploying Jira:
+
+- **AWS Account**: An active account on Amazon Web Services. [Create an AWS Account](https://aws.amazon.com/)
+- **Terraform**: Required for infrastructure provisioning. Tested with version 1.6.6. [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+- **Git**: Version control system to clone and manage the repository. [Install Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+
+### Development Requirements
+For working on the project:
+- **kubectl**: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. [Install kubectl](https://kubernetes.io/docs/tasks/tools/)
+- **Helm**: An application package manager running atop Kubernetes. [Install Helm](https://helm.sh/docs/intro/install/)
+
+
 ## Configuration and Installation
 
 1. [**Install Terraform**](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
@@ -31,21 +44,27 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 3. **Clone the Repository**: `git clone https://github.com/U23Rodin/u23-final-project.git`
 4. **Set up the backend**:
 	- **To use local backend:**
-		1. `cd terraform/`
-		2. Edit providers.tf & remove `backend "s3"` block
+		1. `cd u23-final-project/terraform`
+		2. Edit providers.tf & remove `backend "s3" {}` block or simply run `sed -i '/backend "s3"/,/^  }/d' providers.tf`
 	- **To use remote backend (recommended):**
-	1. `cd terraform-backend/`
-	2. set up a globally unique name for the `s3_bucket_name` variable
-	3. `terraform init`
-	4. `terraform validate`
-	5. `terraform apply`
-6. **Set up terraform**
-	1. `cd terraform`
-	2. set up the same s3 bucket name for the backend in the providers.tf file
-	3. `terraform init`
-	4. `terraform validate`
-	5. `terraform plan&apply`
-
+		1. `cd u23-final-project/terraform-backend`
+		2. set up a globally unique name for the `s3_bucket_name` variable in terraform.tfvars
+		3. 
+			```
+			terraform init
+			terraform validate
+			terraform apply
+			```
+1. **Set up terraform**
+	1. `cd u23-final-project/terraform`
+	2. **If** using remote backend --> run `sed -i 's/jira-project-state/[your-s3-bucket-name]/g' providers.tf` to set up the correct s3 bucket name
+	3. 
+		```
+		terraform init
+		terraform validate
+		terraform plan
+		terraform apply
+		```
 ## Destruction and Clean-up
 
 **Do not use `terraform destroy` directly!**
