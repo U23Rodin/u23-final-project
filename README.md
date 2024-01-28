@@ -2,9 +2,23 @@
 
 ## Description
 
-This project automates the deployment of Atlassian Jira on AWS, utilizing Kubernetes for container orchestration. The core components of the system are provisioned and managed using Terraform, which sets up essential AWS services like RDS, EFS, VPC, EKS, and ELB. Jira itself is deployed through Helm charts, ensuring a streamlined and repeatable installation process.
+This project automates the deployment of Atlassian Jira on AWS, utilizing Kubernetes for container orchestration. The core components of the system are provisioned and managed using Terraform, which sets up essential AWS services. Jira itself is deployed through Helm charts, ensuring a streamlined and repeatable installation process.
 
-[Infrastructure Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/infrastructure-diagram.jpg)
+**AWS Prerequisite Infrastructure**
+- **Amazon RDS (Relational Database Service)**: Provides a managed database service for Jira. RDS hosts the database used by Jira, ensuring high availability, backup, and scalability.
+- **Amazon EFS (Elastic File System)**: Utilized as a shared storage system for Jira’s home directory, allowing multiple instances to access the same data for consistent configuration and data management.
+- **AWS ALB (Application Load Balancer)**: Serves as the entry point for incoming traffic. 
+- **Amazon EKS (Elastic Kubernetes Service)**: Offers a managed Kubernetes control plane. EKS handles the orchestration, scaling, and management of Kubernetes clusters, providing a robust foundation for deploying Jira.
+-------------------------------------------
+**Kubernetes Resources (Deployed via Helm Charts)**:
+- **Ingress (ing)**: Routes external HTTP/HTTPS traffic to the Jira application, enabling user access to Jira's interface.
+- **Service (svc)**: Exposes the Jira application as a network service within the Kubernetes cluster, creating a stable internal endpoint for the Jira pods.
+- **StatefulSet (sts)**: Manages the Jira pods with persistent identities, crucial for Jira's data consistency and state management.
+- **Pods (pod)**: Hosts the Jira application instances, serving as the basic operational units within Kubernetes.
+- **Persistent Volume Claim (PVC) and Persistent Volume (PV)**: Manages storage for Jira's data, with PVCs requesting and PVs providing persistent storage, backed by EFS.
+- **Storage Class (sc)**: Defines the characteristics of the storage used by Jira, ensuring compatibility with EFS for persistent and shared storage needs.
+
+[Infrastructure Diagram: Visualizing the above components ](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/infrastructure-diagram.jpg)
 
 ## Features
 - **Infrastructure as Code (IaC)**: Utilizes Terraform to create a reproducible, version-controlled infrastructure on AWS, ensuring consistency and reliability in deployments.
@@ -15,9 +29,22 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 - **Public Cloud Utilization with AWS**: Leverages various AWS cloud services for a scalable and reliable cloud infrastructure, capable of adapting to changing demands and workloads.
 - **Immutable Infrastructure Principles**: Emphasizes immutable infrastructure, where infrastructure updates are made by replacing components rather than modifying existing ones, thereby reducing inconsistencies and potential errors during deployments.
 
+
+### Workflow Configuration
+1. Staging branch is used for pushing configuration changes --> triggers "Workflow 1" on push
+2. "Workflow 1" runs different checks and creates a terraform plan which is uploaded to S3
+3. A PR is created at the end of the workflow for manual review of the plan
+4. If the PR is confirmed and merged "Workflow 2" is triggered which applies the terraform plan
+
 [Build Pipeline Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/build-pipeline.jpg)
 
 ## Requirements
+
+- AWS Account
+- Terraform installed (Tested with v1.6.6)
+- Kubernetes tools (Optional)
+- Helm (Optional)
+
 ### Operational Requirements
 For deploying Jira:
 
