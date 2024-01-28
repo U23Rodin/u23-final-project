@@ -18,12 +18,6 @@ This project automates the deployment of Atlassian Jira on AWS, utilizing Kubern
 [Build Pipeline Diagram](https://final-project-diagrams.s3.eu-central-1.amazonaws.com/build-pipeline.jpg)
 
 ## Requirements
-
-- AWS Account
-- Terraform installed (Tested with v1.6.6)
-- Kubernetes tools (Optional)
-- Helm (Optional)
-
 ### Operational Requirements
 For deploying Jira:
 
